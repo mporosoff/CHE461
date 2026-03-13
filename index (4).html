@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHE 461 — Advanced Kinetics Study Tool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #060b16;
+  --bg-surface: #0c1220;
+  --bg-card: rgba(255,255,255,0.025);
+  --bg-card-hover: rgba(255,255,255,0.045);
+  --border: rgba(255,255,255,0.06);
+  --border-accent: rgba(99,102,241,0.3);
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #475569;
+  --accent: #6366f1;
+  --accent-blue: #3b82f6;
+  --accent-teal: #2dd4bf;
+  --accent-orange: #fb923c;
+  --accent-pink: #f472b6;
+  --accent-red: #f87171;
+  --accent-yellow: #fbbf24;
+  --accent-purple: #a78bfa;
+  --accent-green: #34d399;
+  --accent-fuchsia: #e879f9;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+.container { max-width: 840px; margin: 0 auto; padding: 0 20px; }
+
+/* ── Header ── */
+.header {
+  padding: 28px 0 0;
+  background: linear-gradient(180deg, rgba(99,102,241,0.05) 0%, transparent 100%);
+}
+.header-inner { display: flex; align-items: center; gap: 14; margin-bottom: 4px; }
+.logo {
+  width: 42px; height: 42px; border-radius: 11px;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 700; color: white;
+  box-shadow: 0 4px 20px rgba(99,102,241,0.25);
+}
+.title {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px; font-weight: 800; letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #e2e8f0, #94a3b8);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.subtitle { font-size: 13px; color: var(--text-muted); padding-left: 56px; margin-bottom: 20px; }
+
+/* ── Tabs ── */
+.tabs { display: flex; gap: 8px; padding-bottom: 18px; overflow-x: auto; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab-btn {
+  padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer;
+  font-size: 14px; font-weight: 500; font-family: inherit;
+  transition: all 0.25s ease; white-space: nowrap;
+  background: var(--bg-card); color: var(--text-secondary);
+  border: 1px solid transparent;
+}
+.tab-btn:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+.tab-btn.active {
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent));
+  color: white; box-shadow: 0 4px 18px rgba(99,102,241,0.3);
+}
+
+/* ── Content area ── */
+.content { padding: 20px 0 40px; }
+.section { display: none; }
+.section.active { display: block; }
+
+/* ── Home ── */
+.welcome-box {
+  background: linear-gradient(135deg, rgba(99,102,241,0.07), rgba(59,130,246,0.04));
+  border: 1px solid rgba(99,102,241,0.12);
+  border-radius: 16px; padding: 30px; margin-bottom: 28px;
+}
+.welcome-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+.welcome-text { color: var(--text-secondary); font-size: 14px; line-height: 1.8; }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
+.stat-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 22px; text-align: center;
+}
+.stat-num { font-size: 30px; font-weight: 700; }
+.stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.topics-label {
+  font-size: 12px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--text-secondary); margin-bottom: 14px;
+}
+.topics-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+.topic-badge {
+  border-radius: 10px; padding: 10px 16px;
+  font-size: 13px; font-weight: 500;
+  border: 1px solid;
+}
+
+/* ── Q&A Chat ── */
+.chat-wrapper { display: flex; flex-direction: column; height: calc(100vh - 180px); }
+.chat-messages {
+  flex: 1; overflow-y: auto; padding: 20px 0;
+  scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent;
+}
+.chat-messages::-webkit-scrollbar { width: 6px; }
+.chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+.chat-empty { padding: 40px 0; text-align: center; }
+.chat-empty-icon { font-size: 44px; margin-bottom: 14px; }
+.chat-empty-title { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
+.chat-empty-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 28px; }
+.quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 600px; margin: 0 auto; }
+.quick-q {
+  padding: 12px 16px; background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text-secondary); font-size: 13px;
+  cursor: pointer; text-align: left; font-family: inherit; transition: all 0.2s;
+  line-height: 1.5;
+}
+.quick-q:hover { background: rgba(99,102,241,0.08); border-color: var(--border-accent); color: var(--text-primary); }
+
+.msg-list { display: flex; flex-direction: column; gap: 14px; }
+.msg {
+  max-width: 85%; padding: 15px 19px; border-radius: 16px;
+  font-size: 14px; line-height: 1.7; white-space: pre-wrap; word-break: break-word;
+}
+.msg-user {
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent));
+  color: white; align-self: flex-end; border-bottom-right-radius: 4px;
+}
+.msg-ai {
+  background: rgba(255,255,255,0.05); color: var(--text-primary);
+  border: 1px solid var(--border); align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.chat-bar {
+  display: flex; gap: 10px; padding: 16px 0;
+  border-top: 1px solid var(--border);
+  background: var(--bg-deep);
+}
+.chat-input {
+  flex: 1; padding: 13px 18px;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  border-radius: 12px; color: var(--text-primary);
+  font-size: 14px; font-family: inherit; outline: none;
+  transition: border-color 0.2s;
+}
+.chat-input:focus { border-color: var(--border-accent); }
+.chat-input::placeholder { color: var(--text-muted); }
+.send-btn {
+  padding: 13px 22px;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent));
+  border: none; border-radius: 12px; color: white;
+  font-weight: 600; cursor: pointer; font-family: inherit;
+  font-size: 14px; transition: opacity 0.2s;
+}
+.send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.send-btn:hover:not(:disabled) { opacity: 0.9; }
+
+@keyframes blink { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: blink 1.2s infinite; }
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+.loading-dots { display: flex; gap: 6px; padding: 4px 0; }
+
+/* ── Problems ── */
+.filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+.filter-chip {
+  padding: 7px 15px; border-radius: 20px; font-size: 12px; font-weight: 500;
+  cursor: pointer; border: 1px solid var(--border); background: var(--bg-card);
+  color: var(--text-secondary); transition: all 0.2s; font-family: inherit;
+  white-space: nowrap;
+}
+.filter-chip:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+.filter-chip.active {
+  background: rgba(99,102,241,0.12); border-color: var(--border-accent); color: #a5b4fc;
+}
+
+.problem-list { display: flex; flex-direction: column; gap: 16px; }
+.problem-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 24px; transition: all 0.2s; cursor: pointer;
+}
+.problem-card:hover { border-color: rgba(99,102,241,0.2); background: var(--bg-card-hover); }
+.problem-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.problem-tags { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.problem-topic {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.difficulty-badge {
+  font-size: 11px; padding: 2px 10px; border-radius: 20px; font-weight: 600;
+}
+.diff-medium { background: rgba(251,191,36,0.1); color: var(--accent-yellow); }
+.diff-hard { background: rgba(248,113,113,0.1); color: var(--accent-red); }
+.diff-challenge { background: rgba(232,121,249,0.1); color: var(--accent-fuchsia); }
+
+.problem-text { font-size: 14px; line-height: 1.75; color: #cbd5e1; white-space: pre-wrap; }
+.expand-icon {
+  font-size: 13px; color: var(--text-muted); transition: transform 0.25s;
+  flex-shrink: 0;
+}
+
+.problem-actions { margin-top: 18px; display: flex; flex-direction: column; gap: 12px; }
+.action-btn {
+  padding: 9px 18px; border-radius: 9px; border: 1px solid var(--border);
+  background: var(--bg-card); color: var(--text-secondary);
+  font-size: 13px; cursor: pointer; font-family: inherit;
+  transition: all 0.2s; text-align: left;
+}
+.action-btn:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+
+.hint-box {
+  padding: 16px 18px; border-radius: 10px;
+  background: rgba(251,191,36,0.05); border: 1px solid rgba(251,191,36,0.12);
+  font-size: 13px; color: var(--accent-yellow); line-height: 1.7;
+}
+.solution-box {
+  padding: 20px; border-radius: 10px;
+  background: rgba(99,102,241,0.04); border: 1px solid rgba(99,102,241,0.12);
+  font-size: 13px; color: #cbd5e1; line-height: 1.8;
+  white-space: pre-wrap; font-family: 'IBM Plex Mono', monospace;
+}
+
+.problem-count {
+  font-size: 13px; color: var(--text-muted); margin-bottom: 16px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .quick-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .msg { max-width: 92%; }
+  .container { padding: 0 14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="container">
+    <div class="header-inner">
+      <div class="logo">⚛</div>
+      <div class="title">CHE 461</div>
+    </div>
+    <div class="subtitle">Advanced Kinetics &amp; Reactor Design — Midterm Study Tool</div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('home')">◈ Home</button>
+      <button class="tab-btn" onclick="switchTab('qa')">◇ Ask AI</button>
+      <button class="tab-btn" onclick="switchTab('problems')">△ Practice Problems</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="content">
+
+    <!-- ════════ HOME ════════ -->
+    <div id="tab-home" class="section active">
+      <div class="welcome-box">
+        <div class="welcome-title">Welcome to your study companion</div>
+        <div class="welcome-text">
+          This tool covers the first half of CHE 461 through the midterm — rate laws, collision theory, transition state theory, catalysis, Langmuir-Hinshelwood kinetics, and model reduction. Built from Prof. Porosoff's lectures, homework assignments, and past exams.<br><br>
+          <strong>Ask AI</strong> — Get explanations, work through derivations, and clarify concepts with an AI tutor trained on the course material.<br>
+          <strong>Practice Problems</strong> — 20 worked problems spanning all midterm topics, each with hints and detailed solutions.
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-num" style="color:var(--accent)">20</div>
+          <div class="stat-label">Practice Problems</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" style="color:var(--accent-blue)">AI</div>
+          <div class="stat-label">Unlimited Q&A Tutor</div>
+        </div>
+      </div>
+      <div class="topics-label">Topics Covered</div>
+      <div class="topics-grid">
+        <div class="topic-badge" style="color:var(--accent-teal);background:rgba(45,212,191,0.06);border-color:rgba(45,212,191,0.2)">⚗️ Rate Laws</div>
+        <div class="topic-badge" style="color:var(--accent-orange);background:rgba(251,147,60,0.06);border-color:rgba(251,147,60,0.2)">💥 Collision Theory</div>
+        <div class="topic-badge" style="color:var(--accent-purple);background:rgba(167,139,250,0.06);border-color:rgba(167,139,250,0.2)">⚡ Transition State Theory</div>
+        <div class="topic-badge" style="color:var(--accent-pink);background:rgba(244,114,182,0.06);border-color:rgba(244,114,182,0.2)">🧪 Catalysis &amp; Adsorption</div>
+        <div class="topic-badge" style="color:var(--accent-blue);background:rgba(96,165,250,0.06);border-color:rgba(96,165,250,0.2)">📈 LH Kinetics</div>
+        <div class="topic-badge" style="color:var(--accent-yellow);background:rgba(251,191,36,0.06);border-color:rgba(251,191,36,0.2)">✂️ Model Reduction</div>
+        <div class="topic-badge" style="color:var(--accent-red);background:rgba(248,113,113,0.06);border-color:rgba(248,113,113,0.2)">📝 Reactor Design</div>
+        <div class="topic-badge" style="color:var(--accent-fuchsia);background:rgba(232,121,249,0.06);border-color:rgba(232,121,249,0.2)">🎯 Integrated Exam Problems</div>
+      </div>
+    </div>
+
+    <!-- ════════ Q&A ════════ -->
+    <div id="tab-qa" class="section">
+      <div class="chat-wrapper">
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-empty" id="chatEmpty">
+            <div class="chat-empty-icon">🧑‍🔬</div>
+            <div class="chat-empty-title">Ask me anything about CHE 461</div>
+            <div class="chat-empty-sub">I know the course material from lectures, homework, and exams</div>
+            <div class="quick-grid">
+              <button class="quick-q" onclick="useQuickQ(this.textContent)">Derive the Langmuir isotherm for dissociative adsorption step by step</button>
+              <button class="quick-q" onclick="useQuickQ(this.textContent)">Explain why collision theory needs a steric factor — what does TST do better?</button>
+              <button class="quick-q" onclick="useQuickQ(this.textContent)">Walk me through the PSS vs partial equilibrium approaches for CO oxidation</button>
+              <button class="quick-q" onclick="useQuickQ(this.textContent)">How does the Sabatier principle connect to degree of rate control?</button>
+              <button class="quick-q" onclick="useQuickQ(this.textContent)">Why can a catalytic reaction rate decrease at high temperature?</button>
+              <button class="quick-q" onclick="useQuickQ(this.textContent)">How do I figure out the temperature dependence of A from partition functions?</button>
+            </div>
+          </div>
+          <div class="msg-list" id="msgList" style="display:none"></div>
+        </div>
+        <div class="chat-bar">
+          <input class="chat-input" id="chatInput" placeholder="Ask about rate laws, TST, catalysis, mechanisms..." onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="send-btn" id="sendBtn" onclick="sendChat()">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════ PROBLEMS ════════ -->
+    <div id="tab-problems" class="section">
+      <div class="filter-bar" id="filterBar"></div>
+      <div class="problem-count" id="problemCount"></div>
+      <div class="problem-list" id="problemList"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// ⬇️  PASTE YOUR ANTHROPIC API KEY HERE  ⬇️
+// Get one at: https://console.anthropic.com/settings/keys
+// Set a monthly spend limit at: https://console.anthropic.com/settings/limits
+// ═══════════════════════════════════════
+const ANTHROPIC_API_KEY = "YOUR_API_KEY_HERE";
+// ═══════════════════════════════════════
+
+// ═══════════════════════════════════════
+// COURSE KNOWLEDGE BASE
+// ═══════════════════════════════════════
+const SYSTEM_PROMPT = `You are a study assistant for CHE 461: Advanced Chemical Kinetics and Reactor Design at the University of Rochester, taught by Prof. Marc Porosoff. You help students study for the MIDTERM EXAM covering the first half of the course.
+
+COURSE TOPICS COVERED (First Half):
+
+1. RATE LAWS & REACTION KINETICS
+- First order: -d[A]/dt = k[A], integrated: [A]=[A]₀exp(-kt), plot ln(A/A₀) vs t gives slope -k
+- Second order: -d[A]/dt = k[A]², integrated: 1/[A]-1/[A]₀ = kt
+- Second order (two species): -dA/dt = kAB, solution: ln(B·A₀/(A·B₀)) = (B₀-A₀)kt
+- Pseudo-first order: [B]₀>>[A]₀ → rate = k'[A] where k'=k[B]₀
+- Parallel reactions: A→B(k₁), A→C(k₂): A=A₀exp(-(k₁+k₂)t), selectivity=k₁/(k₁+k₂)
+- Consecutive: A→B→C: B=(k₁/(k₂-k₁))A₀[exp(-k₁t)-exp(-k₂t)], C=A₀-A-B
+  Case I (k₂<<k₁): B accumulates; Case II (k₂>>k₁): B consumed instantly
+- Reversible reactions and equilibrium conversion
+- Batch reactor design: dX/dt = -rₐ/Cₐ₀ (constant V)
+- PFR design: dX/dτ = -rₐ/Cₐ₀ where τ = V/v₀
+- Van't Hoff equation for equilibrium: d(lnK)/dT = ΔH/(RT²)
+- Determining reaction order from experimental data
+
+2. MOLECULAR KINETICS: POTENTIAL ENERGY SURFACES
+- 3-atom system D + H-H → D-H + H (3N-6 = 3 internal DOF for nonlinear)
+- Fix bond angle, plot potential energy vs two bond distances → PES
+- Reaction path = minimum energy path across PES
+- Saddle point = transition state
+
+3. COLLISION THEORY
+- Collision rate: Z₁₂ = πb²_max·Vᵣ·n₁*·n₂* where b_max = r₁+r₂
+- k(Eᵣ) = σ(Eᵣ)·Vᵣ, where Eᵣ = ½μVᵣ², μ = M₁M₂/(M₁+M₂)
+- σ(Eᵣ) = πb²_max(1-E*/Eᵣ) for Eᵣ≥E*, else 0
+- k(T) by averaging over Maxwell-Boltzmann G(Eᵣ)
+- G(Eᵣ) = 2π(1/(πk_BT))^(3/2)·√Eᵣ·exp(-Eᵣ/k_BT)
+- Result: k(T) = πb²_max·√(8k_BT/(πμ))·exp(-E*/(k_BT))
+- Arrhenius form: k = A·exp(-Ea/RT)
+- Steric factor p = k_obs/k_collision accounts for orientation
+- Limitation: doesn't account for molecular structure of transition state
+
+4. TRANSITION STATE THEORY (TST / ACT)
+- A + B ⇌ AB‡ → Products (quasi-equilibrium with activated complex)
+- k_TST = (k_BT/h)·(q‡/∏qᵢ)·exp(-E₀/k_BT)
+- Partition functions:
+  Translational (3D, per vol): qₜ = (2πmk_BT)^(3/2)/h³
+  Rotational (linear): zᵣ = 8π²Ik_BT/(h²σ)
+  Rotational (nonlinear): zᵣ = [π^(1/2)(8π²k_BT)^(3/2)/(h³σ)](I_AI_BI_C)^(1/2)
+  Vibrational: zᵥ = [1-exp(-hν/k_BT)]⁻¹ ≈ k_BT/(hν) at high T
+- DOF: 3N total; linear: 3trans+2rot+(3N-5)vib; nonlinear: 3trans+3rot+(3N-6)vib
+- TS has one fewer vib mode (reaction coordinate)
+- Temperature dependence of A: count T powers from each partition function
+  Trans per DOF: T^(1/2); Rot per DOF: T^(1/2) (in high-T limit); Vib (high T): T^1; plus k_BT/h → T^1
+- Loose vs tight TS: entropy argument (ΔS‡)
+- Pre-exponential of desorption: related to rotational freedom lost upon adsorption
+- Entropy of adsorption: pore vs flat surface (pore → more entropy loss → slower desorption)
+
+5. INTRODUCTION TO CATALYSIS
+- 4 steps: Adsorption (exo) → Migration → Reaction → Desorption (endo)
+- 5 catalyst mechanisms: (1) initiate rxns, (2) promote/inhibit pathways, (3) stabilize intermediates, (4) hold proper configuration, (5) donate/accept electrons
+- Physisorption (~5 kcal/mol, VDW, high mobility) vs Chemisorption (>10 kcal/mol, chem bonds)
+- Competitive vs non-competitive adsorption
+- Molecular (associative) vs dissociative adsorption
+- Rate of adsorption: rₐdₛ = P/√(2πMRT)·Sₕ where Sₕ is sticking coefficient
+  Sₕ depends on: E_ads (exp(-E_ads/RT)), vacant sites θ*, probability g(θ), S₀ (zero-coverage sticking coeff)
+  Associative g(θ)=1-θ, Dissociative g(θ)=(1-θ)²
+- Langmuir isotherm: Molecular: θ=KP/(1+KP); Dissociative: θ=√(KP)/(1+√(KP))
+- Turnover frequency (TOF) = moles converted per active site per time
+- ΔH_ads negative (exothermic); usually assume E_ads≈0, so ΔH_ads = -E_des
+
+6. LANGMUIR-HINSHELWOOD KINETICS
+- Unimolecular: A+* ⇌ A* →(kr) B+*
+  θ_A = KP_A/(1+KP_A) where K = k_a/(k_d+k_r)
+  Rate = k_r·KP_A/(1+KP_A)
+  Weak ads (KP<<1): 1st order; Strong ads (KP>>1): 0th order
+- Case k_d>>k_r: E_app = E_r - |ΔH_ads| (apparent barrier reduced by adsorption heat)
+  If E_r >> E_d → fast desorption relative to reaction
+  Case: Strong ads KP_A>>1: rate = k_r, zero order, Arrhenius T dependence
+- Bimolecular: A*+B* → products: rate = k·θ_A·θ_B
+- Dissociative CO adsorption coverage: θ_A = √(KP_CO)/(1+2√(KP_CO))
+- High coverage doesn't always → faster reaction (need balanced coverage of both species)
+
+7. MODEL REDUCTION TECHNIQUES
+- CO oxidation on surface: CO+½O₂→CO₂
+  Steps: (1) CO(g)+* ⇌ CO*, (2) O₂(g)+2* ⇌ 2O*, (3a) CO*+O* ⇌ CO₂*+*, (3b) CO₂* ⇌ CO₂(g)+*
+  Unknowns: θ_CO, θ_O, θ_CO₂, θ*; Site balance: Σθᵢ + θ* = 1
+- PSS: dθᵢ/dt = 0 for all intermediates
+- Partial equilibrium (PE): non-RDS steps at equilibrium → K_i expressions
+- Both give same result when RDS assumption holds
+- RDS identification: rate = k_RDS × (function of coverages from equilibrated steps)
+- Example: 2O₃→3O₂ mechanism via O₃⇌O₂+O (fast eq) then O+O₃→2O₂ (RDS)
+  Result: rate = k₁k₂[O₃]²/(k₋₁[O₂]) — 2nd order O₃, -1st order O₂
+
+8. DEGREE OF RATE CONTROL & ENERGETIC SPAN
+- Energetic span = E(highest TS) - E(deepest preceding intermediate)
+- The TS with the largest span controls the rate
+- NOT just the highest absolute TS — must consider relative to preceding wells
+
+9. KEY EXAM CONCEPTS
+- 100% conversion in first-order batch → infinite time (ln(0)→-∞)
+- Gas-phase vs surface-mediated rate laws identical when θ_A<<1 (low coverage)
+- Negative apparent Ea explained by fast pre-equilibrium with exothermic step (e.g., NO+O₂→NO₂ via NO₃)
+- At high T with large ΔH_ads: desorption dominates → rate decreases
+
+When answering:
+- Be thorough but clear. Show derivation steps.
+- Use proper chemical notation and equations.
+- Reference specific lecture examples when relevant.
+- If a topic is beyond the midterm scope, say so.
+- Encourage conceptual understanding, not memorization.
+- Use symbols like θ, Σ, →, ⇌, ΔH, etc. for readability.`;
+
+// ═══════════════════════════════════════
+// PRACTICE PROBLEMS (20 total)
+// ═══════════════════════════════════════
+const PROBLEMS = [
+  // ── RATE LAWS (1-4) ──
+  {
+    id:1, topic:"Rate Laws", difficulty:"Medium", icon:"⚗️", color:"var(--accent-teal)",
+    question:"The decomposition of N₂O₅ follows first-order kinetics with k = 5.1×10⁻⁴ s⁻¹ at 45°C. Starting with 0.25 mol in a 10 L vessel:\n\n(a) How long until 90% has decomposed?\n(b) What is the half-life?\n(c) Does the initial amount or volume matter for your answer? Why or why not?",
+    hint:"Use the integrated first-order rate law. Think about what quantity appears in the exponential — is it concentration or ratio?",
+    solution:`(a) First-order integrated rate law: ln([A]/[A]₀) = -kt
+At 90% decomposition, [A]/[A]₀ = 0.10
+
+ln(0.10) = -(5.1×10⁻⁴)t
+-2.303 = -(5.1×10⁻⁴)t
+t = 4516 s ≈ 75.3 min
+
+(b) Half-life: t₁/₂ = ln(2)/k = 0.693/(5.1×10⁻⁴)
+t₁/₂ = 1359 s ≈ 22.6 min
+
+(c) NO — neither the amount nor volume matters. The first-order rate law depends only on the RATIO [A]/[A]₀. Since both [A] and [A]₀ scale with the same volume, V cancels out. This is a hallmark of first-order kinetics: the time to reach a given fractional conversion is independent of initial concentration.`
+  },
+  {
+    id:2, topic:"Rate Laws", difficulty:"Hard", icon:"⚗️", color:"var(--accent-teal)",
+    question:"For consecutive reactions A →(k₁) B →(k₂) C with k₁ = 0.5 min⁻¹ and k₂ = 0.1 min⁻¹, starting with A₀ = 1 mol/L and no B or C:\n\n(a) At what time is [B] maximized?\n(b) What is [B]_max?\n(c) If you wanted to harvest B as a product, what experimental strategy would you use?",
+    hint:"Set d[B]/dt = 0. The expression for [B](t) involves two exponentials. For part (c), think about what happens physically at t_max.",
+    solution:`The solution for B: [B] = k₁/(k₂-k₁) · A₀ · [exp(-k₁t) - exp(-k₂t)]
+
+(a) d[B]/dt = 0 → k₁·exp(-k₁·t) = k₂·exp(-k₂·t)
+Taking ln of both sides: ln(k₁/k₂) = (k₁ - k₂)·t_max
+
+t_max = ln(k₁/k₂)/(k₁ - k₂)
+t_max = ln(0.5/0.1)/(0.5 - 0.1) = ln(5)/0.4
+t_max = 1.609/0.4 = 4.02 min
+
+(b) Plug t_max back in:
+[B]_max = (0.5/(-0.4))·1·[exp(-0.5×4.02) - exp(-0.1×4.02)]
+= -1.25·[exp(-2.01) - exp(-0.402)]
+= -1.25·[0.134 - 0.669]
+= -1.25·(-0.535) = 0.669 mol/L
+
+(c) Run as a batch reactor and STOP the reaction at t = t_max ≈ 4 min. Since k₁ > k₂ (B forms faster than it's consumed), B accumulates to a significant level. You'd want to rapidly quench the reaction (e.g., cool suddenly or remove from reactor) at the optimal time.`
+  },
+  {
+    id:3, topic:"Rate Laws", difficulty:"Medium", icon:"⚗️", color:"var(--accent-teal)",
+    question:"CO oxidation is conducted in a batch reactor with a large excess of oxygen, such that you can assume pseudo-first order conditions.\n\n(a) Starting from the batch reactor design equation and rate law, show mathematically how long it takes to reach 100% conversion.\n(b) What does this result mean physically?\n\n(This is adapted from the 2025 midterm, Part II.)",
+    hint:"Write the design equation for a constant-volume batch reactor. With pseudo-first order, the rate is r = k'[CO]. Integrate from X=0 to X=1.",
+    solution:`Design equation (constant V batch): d[CO]/dt = -k'[CO]
+
+where k' = k[O₂]₀ (pseudo-first order since O₂ is in large excess)
+
+Integrating: [CO] = [CO]₀ · exp(-k't)
+
+In terms of conversion X: [CO] = [CO]₀(1-X)
+
+So: 1-X = exp(-k't) → t = -(1/k')·ln(1-X)
+
+For X = 1 (100% conversion):
+t = -(1/k')·ln(1-1) = -(1/k')·ln(0) → ∞
+
+(a) t → ∞. It takes infinite time to reach 100% conversion.
+
+(b) Physical meaning: A first-order reaction rate is proportional to concentration. As [CO] → 0, the rate also → 0. The reaction slows down asymptotically and never truly reaches completion. The last few molecules of CO have an vanishingly small probability of reacting per unit time.
+
+This is why in practice we target "high" conversion (95%, 99%) rather than 100%, or use strategies like removing products to shift equilibrium.`
+  },
+  {
+    id:4, topic:"Rate Laws", difficulty:"Hard", icon:"⚗️", color:"var(--accent-teal)",
+    question:"You measure the activation energy for a reaction and get Ea = 25 kcal/mol, but the TRUE value is 30 kcal/mol. The pre-exponential is measured correctly.\n\n(a) What is the ratio of calculated to actual rate constant at 500 K?\n(b) By how much must you raise the temperature so that the actual rate constant equals your calculated (wrong) value at 500 K?\n(c) Discuss the implications for an industrial exothermic process.\n\n(From HW2, Problem 1.)",
+    hint:"Write k_calc/k_actual using Arrhenius. For part (b), set k_actual(T_new) = k_calc(500 K) and solve for T_new.",
+    solution:`(a) k = A·exp(-Ea/(RT)), with R = 1.987 cal/(mol·K)
+
+k_calc/k_actual = exp(-(25000)/(1.987×500)) / exp(-(30000)/(1.987×500))
+= exp((-25000+30000)/(1.987×500))
+= exp(5000/993.5) = exp(5.033)
+= 153.4
+
+The calculated k is ~153× too large! Underestimating Ea by 5 kcal/mol causes a massive error.
+
+(b) Set A·exp(-30000/(R·T_new)) = A·exp(-25000/(R·500))
+→ -30000/(R·T_new) = -25000/(R·500)
+→ 30000/T_new = 25000/500 = 50
+→ T_new = 30000/50 = 600 K
+
+You need to raise T by 100 K (from 500 to 600 K).
+
+(c) For an exothermic process: operating 100 K hotter is dangerous! Higher T means less equilibrium conversion (Le Chatelier), higher energy costs, potential runaway reactions, catalyst sintering/deactivation. A 5 kcal/mol error in Ea could lead to designing a reactor at the wrong T, resulting in either insufficient conversion or thermal runaway.`
+  },
+
+  // ── COLLISION THEORY (5-7) ──
+  {
+    id:5, topic:"Collision Theory", difficulty:"Medium", icon:"💥", color:"var(--accent-orange)",
+    question:"For hard-sphere collisions between Ar (M=40 g/mol, r=1.7 Å) and N₂ (M=28 g/mol, r=1.9 Å) with a threshold energy E*=15 kJ/mol:\n\n(a) Calculate the reduced mass.\n(b) At what collision energy does the cross section equal half its maximum value?\n(c) What fraction of collisions at 300 K have enough energy to react? (Use exp(-E*/(k_BT)))",
+    hint:"σ(Eᵣ) = πb²_max(1-E*/Eᵣ). Think about what condition gives σ = ½σ_max. For (c), the Boltzmann factor gives the fraction with E > E*.",
+    solution:`(a) μ = M₁M₂/(M₁+M₂) = (40×28)/(40+28) = 1120/68 = 16.47 g/mol
+In kg: μ = 16.47×10⁻³/6.022×10²³ = 2.74×10⁻²⁶ kg
+
+(b) σ_max = πb²_max (achieved as Eᵣ → ∞)
+Set σ = ½σ_max:
+πb²_max(1-E*/Eᵣ) = ½πb²_max
+1 - E*/Eᵣ = 0.5
+E*/Eᵣ = 0.5
+Eᵣ = 2E* = 30 kJ/mol
+
+The cross section reaches half-maximum when collisions have twice the threshold energy.
+
+(c) Fraction ≈ exp(-E*/(RT)) = exp(-15000/(8.314×300))
+= exp(-6.01) = 0.00246 = 0.25%
+
+Only about 1 in 400 collisions has sufficient energy at 300 K. This is why many gas-phase reactions are slow at room temperature despite frequent molecular collisions.`
+  },
+  {
+    id:6, topic:"Collision Theory", difficulty:"Hard", icon:"💥", color:"var(--accent-orange)",
+    question:"Starting from k(Eᵣ) = σ(Eᵣ)·vᵣ and the Maxwell-Boltzmann energy distribution G(Eᵣ), derive the collision theory rate constant k(T). Show all integration steps.\n\nG(Eᵣ) = 2π(1/(πk_BT))^(3/2)·√Eᵣ·exp(-Eᵣ/(k_BT))",
+    hint:"Substitute σ(Eᵣ) and vᵣ = √(2Eᵣ/μ). Change limits of integration to E* → ∞ (since σ=0 below E*). You'll need the standard integral ∫x·exp(-ax)dx.",
+    solution:`k(T) = ∫₀^∞ k(Eᵣ)·G(Eᵣ)·dEᵣ
+
+Step 1: Substitute components
+k(Eᵣ) = σ(Eᵣ)·vᵣ = πb²_max(1-E*/Eᵣ)·√(2Eᵣ/μ)
+
+Step 2: Combine with G(Eᵣ), noting σ=0 for Eᵣ<E*:
+k(T) = ∫_{E*}^∞ πb²_max(1-E*/Eᵣ)·√(2Eᵣ/μ)·2π(1/(πk_BT))^(3/2)·√Eᵣ·exp(-Eᵣ/(k_BT))·dEᵣ
+
+Step 3: Simplify — collect constants:
+= πb²_max · √(2/μ) · 2π/(πk_BT)^(3/2) · ∫_{E*}^∞ (Eᵣ - E*)·exp(-Eᵣ/(k_BT))·dEᵣ
+
+Step 4: Evaluate the integral using substitution u = Eᵣ-E*:
+∫_{E*}^∞ (Eᵣ-E*)exp(-Eᵣ/k_BT)dEᵣ = exp(-E*/k_BT)·∫₀^∞ u·exp(-u/k_BT)du
+= exp(-E*/k_BT)·(k_BT)²
+
+Step 5: Combine everything:
+k(T) = πb²_max · √(8k_BT/(πμ)) · exp(-E*/(k_BT))
+
+This has the Arrhenius form k = A·exp(-Ea/RT) where:
+A = πb²_max·√(8k_BT/(πμ)) (weakly T-dependent pre-exponential)
+Ea = E* (threshold energy ≈ activation energy)`
+  },
+  {
+    id:7, topic:"Collision Theory", difficulty:"Medium", icon:"💥", color:"var(--accent-orange)",
+    question:"Collision theory predicts A = πb²_max·√(8k_BT/(πμ)) for the pre-exponential factor. For the reaction H₂ + I₂ → 2HI, the experimentally measured A is about 100× smaller than the collision theory prediction.\n\n(a) What physical reason explains this discrepancy?\n(b) What modification do we make to collision theory to fix this?\n(c) Which theory naturally accounts for this without needing a correction factor?",
+    hint:"Not all energetically sufficient collisions lead to reaction. Think about molecular orientation. What does TST do differently?",
+    solution:`(a) Collision theory treats molecules as featureless hard spheres. In reality, molecules must collide in the proper ORIENTATION for bonds to break and form. For H₂ + I₂, the H-H bond must be oriented correctly relative to the I-I bond for the 4-center transition state to form. Most energetically sufficient collisions miss the right geometry.
+
+(b) We introduce the STERIC FACTOR p:
+k = p · πb²_max · √(8k_BT/(πμ)) · exp(-E*/k_BT)
+
+where p = k_observed/k_collision_theory, typically p << 1 for complex molecules.
+For H₂ + I₂: p ≈ 0.01 (1/100).
+
+(c) TRANSITION STATE THEORY (TST/ACT) naturally accounts for this. Instead of a generic collision cross section, TST uses the partition function of the actual transition state structure q‡, which encodes the geometry, vibrational frequencies, and rotational properties of the specific transition state. A "tight" transition state (restricted geometry) automatically gives a smaller pre-exponential than a "loose" one — no ad hoc correction needed.`
+  },
+
+  // ── TRANSITION STATE THEORY (8-10) ──
+  {
+    id:8, topic:"Transition State Theory", difficulty:"Hard", icon:"⚡", color:"var(--accent-purple)",
+    question:"Two OH radicals react to form H₂O₂ via a HOOH‡ transition state:\n2OH → [HOOH]‡ → H₂O₂\n\n(a) List all degrees of freedom for each species (OH, HOOH‡).\n(b) Write the molecular partition function form for each.\n(c) Determine the temperature dependence of the pre-exponential A (find n in A ∝ Tⁿ) using the high-T vibrational limit.\n(d) Is this result universally valid at all temperatures?\n\n(Adapted from 2025 Midterm, Part V.)",
+    hint:"OH is a linear diatomic. HOOH‡ is nonlinear with 4 atoms. Don't forget the TS loses one vibrational mode. Count everything carefully.",
+    solution:`(a) Degrees of Freedom:
+OH (linear, 2 atoms): 3 trans + 2 rot + 1 vib = 6 total (3×2)
+Two OH molecules: 2×(3T + 2R + 1V) = 6T + 4R + 2V
+
+HOOH‡ (nonlinear, 4 atoms): 3 trans + 3 rot + (3×4-6-1) = 5 vib
+= 3T + 3R + 5V (one mode lost to reaction coordinate)
+
+(b) Partition functions:
+q_OH = qₜ · qᵣ(linear) · qᵥ₁ → per molecule
+q_HOOH‡ = qₜ · qᵣ(nonlinear) · qᵥ₁ · qᵥ₂ · qᵥ₃ · qᵥ₄ · qᵥ₅
+
+(c) Temperature dependence (high-T limit):
+k = (k_BT/h) · q‡/(q_OH)²
+
+Each contributes: trans → T^(3/2), rot(linear) → T, rot(nonlinear) → T^(3/2), vib(high T) → T
+
+Numerator (TS): T¹ × T^(3/2) × T^(3/2) × T⁵ = T^(3/2+3/2+5+1) = T^11
+(k_BT/h contributes T¹)
+
+Denominator (2 OH): [T^(3/2) × T¹ × T¹]² = [T^(7/2)]² = T⁷
+
+A ∝ T^(11-7) = T⁴ → n = 4
+
+Wait — let me recount more carefully:
+Numerator: (k_BT/h)→T¹, qₜ→T^(3/2), qᵣ(NL)→T^(3/2), 5 vib→T⁵
+Total: T^(1+1.5+1.5+5) = T⁹
+
+Denominator: [qₜ→T^(3/2), qᵣ(L)→T¹, 1 vib→T¹]² = [T^(3.5)]² = T⁷
+
+n = 9 - 7 = 2
+
+A ∝ T²
+
+(d) This is NOT universally true. At low T, the vibrational partition function doesn't follow the k_BT/(hν) approximation — it approaches 1. The high-T limit only applies when k_BT >> hν for all vibrational modes. At low T, the actual zᵥ = [1-exp(-hν/k_BT)]⁻¹ must be used, changing the T dependence.`
+  },
+  {
+    id:9, topic:"Transition State Theory", difficulty:"Medium", icon:"⚡", color:"var(--accent-purple)",
+    question:"Using ACT, which molecule would have a larger pre-exponential factor for C-H bond scission: propane (C₃H₈) or butane (C₄H₁₀)? Explain your reasoning in terms of partition functions.\n\n(From HW3, Problem 2.)",
+    hint:"Think about what happens to the molecule's structure at the transition state for C-H scission. How do the moments of inertia and vibrational modes change?",
+    solution:`For C-H scission: R-H → [R···H]‡ → R• + H•
+
+The TS is a "loose" transition state — the H is partially detached, so the C-H stretch is converting into a translational mode (reaction coordinate).
+
+Key insight: The pre-exponential A ∝ q‡/q_reactant
+
+BUTANE has the larger pre-exponential because:
+
+1) Larger molecule → larger moments of inertia → larger rotational partition function
+2) More vibrational modes in both reactant and TS, but the RATIO q‡/q_reactant matters
+3) Butane has more internal rotations (C-C torsions) that are relatively unchanged between reactant and TS
+4) The transition state for butane C-H scission has a larger "phase space" — more accessible configurations
+
+More precisely: both molecules lose one C-H stretch to become the reaction coordinate, but butane's TS has more remaining vibrational modes and larger rotational partition functions. The absolute magnitude of A increases with molecular size for similar bond-breaking processes.
+
+This is consistent with the general trend: larger molecules have larger pre-exponential factors for unimolecular decomposition.`
+  },
+  {
+    id:10, topic:"Transition State Theory", difficulty:"Hard", icon:"⚡", color:"var(--accent-purple)",
+    question:"Plot the pre-exponential factor of desorption versus degrees of rotational freedom lost for a molecule going from gas phase to adsorbed state.\n\n(a) Explain qualitatively why this relationship exists.\n(b) For methane, ethane, and propane desorbing from a surface, rank them by pre-exponential of desorption. Assume similar adsorption geometries.\n(c) If two species have the same ΔH_ads, which desorbs faster — the one losing more or fewer rotational degrees of freedom?\n\n(From HW3, Problem 3.)",
+    hint:"The pre-exponential of desorption relates to the entropy difference between the adsorbed and gas-phase states. More rotational freedom lost upon adsorption means...",
+    solution:`(a) The pre-exponential of desorption is proportional to the ratio of partition functions: gas phase (product of desorption) vs adsorbed state (reactant):
+
+A_des ∝ q_gas/q_ads
+
+The gas phase has full translational and rotational freedom. Upon adsorption, molecules lose translational DOF (become vibrational modes against the surface) and may lose rotational DOF depending on how tightly they're bound.
+
+Each lost rotational DOF means q_ads is SMALLER relative to q_gas → A_des is LARGER.
+
+Actually — this is subtle: if a molecule loses rotational freedom upon adsorption, it means the ADSORBED state has fewer rotational modes. In the forward direction (desorption), the product (gas) has MORE rotational partition functions than the reactant (adsorbed). So:
+
+More rotational DOF lost upon adsorption → LARGER A_des
+
+The plot of ln(A_des) vs F_rot(lost) should be roughly linear with positive slope.
+
+(b) Ranking by A_des (largest first): propane > ethane > methane
+
+Larger molecules have more rotational partition function in the gas phase (larger I). When adsorbed, they may lose more rotational freedom. But even at equal F_rot lost, the absolute contribution is larger for bigger molecules.
+
+(c) The species losing MORE rotational DOF upon adsorption will desorb FASTER (larger A_des). This is an entropy-driven effect: there's a larger entropic driving force to reach the high-entropy gas-phase state. The desorption rate is k_des = A_des·exp(-E_des/RT), and with same E_des (same ΔH_ads), the one with larger A_des wins.`
+  },
+
+  // ── CATALYSIS & ADSORPTION (11-13) ──
+  {
+    id:11, topic:"Catalysis & Adsorption", difficulty:"Medium", icon:"🧪", color:"var(--accent-pink)",
+    question:"If an identical species is adsorbed in a pore and on a flat surface with the same enthalpy of adsorption, which case exhibits the higher rate of desorption? Explain using thermodynamic arguments.\n\n(From 2025 Midterm, Part I-iv.)",
+    hint:"Same ΔH means the energy wells are equally deep. What's different? Think about entropy — how does confinement affect the number of accessible microstates?",
+    solution:`The FLAT SURFACE case has a higher rate of desorption.
+
+Thermodynamic argument using transition state theory:
+
+k_des = (k_BT/h) · exp(-ΔG‡_des/(RT))
+ΔG‡_des = ΔH‡_des - TΔS‡_des
+
+Since ΔH_ads is the same for both → ΔH‡_des is the same.
+
+The difference is ENTROPY:
+
+In a PORE: the adsorbed molecule has restricted translational AND rotational freedom due to geometric confinement. It has LESS entropy than on a flat surface.
+
+On a FLAT SURFACE: the adsorbed molecule retains more 2D translational freedom and rotational freedom. It has MORE entropy.
+
+For desorption (going to gas phase):
+ΔS‡_des = S‡ - S_ads
+
+Since S_ads(pore) < S_ads(flat), and the transition state is similar:
+ΔS‡_des(pore) > ΔS‡_des(flat)
+
+Wait — this would mean the pore has larger ΔS‡... Let me reconsider:
+
+Actually, for desorption from the pore, the molecule starts with LESS entropy, so the entropy GAIN upon reaching the TS is larger. BUT the TS for desorption from a pore is more constrained (must exit through the pore opening), so S‡(pore) < S‡(flat).
+
+The net effect: the pore's TS is more constrained, AND the surface state has less entropy. The rate-limiting factor is that the pore TS is geometrically restricted → effectively a higher free energy barrier.
+
+Result: k_des(flat) > k_des(pore) — flat surface desorbs faster.
+
+Physical intuition: it's harder to escape from a pore because you need to find the exit with the right orientation and direction.`
+  },
+  {
+    id:12, topic:"Catalysis & Adsorption", difficulty:"Medium", icon:"🧪", color:"var(--accent-pink)",
+    question:"Derive the Langmuir isotherm for dissociative adsorption of H₂:\nH₂ + 2* ⇌ 2H*\n\nStart from the rate expressions for adsorption and desorption, apply the steady-state condition, and solve for θ_H.",
+    hint:"The adsorption rate depends on P_H₂ and θ*², while the desorption rate depends on θ_H². The site balance is 1 = θ_H + θ*.",
+    solution:`Step 1: Write rate expressions
+r_ads = k_ads · P_H₂ · θ*²    (need two adjacent vacant sites)
+r_des = k_des · θ_H²            (two H atoms must recombine)
+
+Step 2: Steady state (equilibrium) — r_ads = r_des:
+k_ads · P_H₂ · θ*² = k_des · θ_H²
+
+Step 3: Define K = k_ads/k_des:
+K · P_H₂ · θ*² = θ_H²
+
+Step 4: Take square root:
+√(K·P_H₂) · θ* = θ_H
+
+Step 5: Site balance:
+θ_H + θ* = 1  →  θ* = 1 - θ_H
+
+Step 6: Substitute:
+√(K·P_H₂)·(1 - θ_H) = θ_H
+√(K·P_H₂) - √(K·P_H₂)·θ_H = θ_H
+√(K·P_H₂) = θ_H(1 + √(K·P_H₂))
+
+Step 7: Solve:
+┌─────────────────────────────────┐
+│ θ_H = √(K·P_H₂) / (1 + √(K·P_H₂)) │
+└─────────────────────────────────┘
+
+Key features:
+• At low P: θ_H ≈ √(KP) — half-order in pressure
+• At high P: θ_H → 1 — surface saturates
+• The √ arises because dissociation requires TWO sites`
+  },
+  {
+    id:13, topic:"Catalysis & Adsorption", difficulty:"Hard", icon:"🧪", color:"var(--accent-pink)",
+    question:"Ethane dehydrogenation on Pt proceeds via adsorption followed by C-H bond scission:\n(1) C₂H₆ + * ⇌ C₂H₆*\n(2) C₂H₆* + * → C₂H₅* + H* (RDS)\n(3) C₂H₅* → C₂H₄ + H* (fast)\n(4) 2H* → H₂ + 2* (fast)\n\nDerive the rate law assuming step 2 is the RDS. Under what conditions is the reaction -1 order in ethane?\n\n(From HW3, Problem 5.)",
+    hint:"Step 1 is in equilibrium (not RDS). Express θ_C₂H₆ using Langmuir. The rate depends on θ_C₂H₆ · θ*. Consider what happens at high ethane pressure.",
+    solution:`Rate = k₂ · θ_C₂H₆ · θ*   (RDS: need adsorbed ethane + vacant site)
+
+Step 1 in equilibrium: K₁ = θ_C₂H₆/(P_C₂H₆ · θ*)
+→ θ_C₂H₆ = K₁ · P_C₂H₆ · θ*
+
+Products desorb quickly → ignore their coverage.
+Assume H coverage is small (H₂ desorbs fast in step 4).
+
+Site balance: θ_C₂H₆ + θ* = 1
+K₁·P·θ* + θ* = 1
+θ* = 1/(1 + K₁P)
+θ_C₂H₆ = K₁P/(1 + K₁P)
+
+Rate = k₂ · K₁P/(1+K₁P) · 1/(1+K₁P)
+
+┌──────────────────────────────────┐
+│ Rate = k₂·K₁·P / (1 + K₁P)²    │
+└──────────────────────────────────┘
+
+For -1 order in ethane: need d(ln r)/d(ln P) = -1
+
+At HIGH ethane pressure (K₁P >> 1):
+Rate ≈ k₂·K₁·P / (K₁P)² = k₂/(K₁·P)
+
+Rate ∝ P⁻¹ → NEGATIVE first order! ✓
+
+Physical meaning: At high P, nearly all sites are occupied by ethane (θ_C₂H₆ → 1, θ* → 0). The reaction needs a vacant site (step 2), but there are none available. Increasing P further reduces θ*, reducing the rate. This is SELF-POISONING — the reactant blocks its own reaction by occupying all the sites.`
+  },
+
+  // ── LH KINETICS (14-16) ──
+  {
+    id:14, topic:"LH Kinetics", difficulty:"Medium", icon:"📈", color:"var(--accent-blue)",
+    question:"For the unimolecular surface reaction A + * ⇌ A* →(kr) B + * (B weakly bound):\n\n(a) Derive the rate expression r = kr·K·PA/(1+KPA)\n(b) What is the apparent activation energy in the limit of weak adsorption (KPA << 1)?\n(c) What is it in the limit of strong adsorption (KPA >> 1)?\n(d) Explain physically why they're different.",
+    hint:"K here is k_a/(k_d + k_r), a pseudo-equilibrium constant. For the Arrhenius analysis, express K in terms of individual rate constants and their activation energies.",
+    solution:`(a) Balance on A*:
+dθ_A/dt = k_a·P_A·θ* - k_d·θ_A - k_r·θ_A = 0 (PSS)
+θ_A(k_d + k_r) = k_a·P_A·θ*
+θ_A = K·P_A·θ* where K = k_a/(k_d+k_r)
+
+Site balance: θ_A + θ* = 1 (B desorbs immediately)
+θ* = 1/(1+KP_A), θ_A = KP_A/(1+KP_A)
+
+Rate = k_r·θ_A = k_r·KP_A/(1+KP_A) ✓
+
+(b) Weak adsorption (KP_A << 1):
+Rate ≈ k_r·K·P_A
+
+If k_d >> k_r: K ≈ k_a/k_d = K_eq (true equilibrium)
+k_r·K_eq = (A_r·e^(-Er/RT))·(A_a/A_d)·e^(-(Ea_ads-Ea_des)/RT)
+
+Since Ea_ads ≈ 0: E_app = E_r - E_des = E_r - |ΔH_ads|
+
+The apparent barrier is REDUCED by the heat of adsorption.
+
+(c) Strong adsorption (KP_A >> 1):
+Rate ≈ k_r = A_r·exp(-E_r/RT)
+
+E_app = E_r (just the surface reaction barrier)
+
+(d) Physical explanation: In the weak-adsorption limit, A must first adsorb (gaining energy |ΔH_ads|), then overcome E_r. The net barrier from the gas phase is E_r - |ΔH_ads|. In the strong-adsorption limit, the surface is already fully covered — the molecule is already adsorbed, so only the surface reaction barrier matters. The adsorption energy is "already spent."
+
+This is why catalysts lower the apparent activation energy — they provide an energetically favorable adsorbed state that reduces the effective barrier.`
+  },
+  {
+    id:15, topic:"LH Kinetics", difficulty:"Hard", icon:"📈", color:"var(--accent-blue)",
+    question:"For the reaction A + B → C, the rate determining step is A* + B* → C (where C desorbs immediately). The binding energy of A is fixed at 25 kcal/mol.\n\n(a) Sketch a plot of reaction rate versus the binding energy of B, for BE_B from 0 to 50 kcal/mol.\n(b) Explain the shape of the curve using the Sabatier principle.\n(c) Where approximately is the maximum, and what determines it?\n\n(Adapted from 2025 Midterm, Part I-ii.)",
+    hint:"The rate = k·θ_A·θ_B. As BE_B increases, θ_B increases but at the cost of fewer vacant sites and potentially surface poisoning.",
+    solution:`(a) The plot should show a VOLCANO-SHAPED curve:
+- Rate starts near zero at BE_B ≈ 0
+- Rises to a maximum at an intermediate BE_B
+- Decreases at high BE_B
+
+(b) Sabatier Principle explanation:
+
+Rate = k_rxn · θ_A · θ_B
+
+LOW BE_B (< ~10 kcal/mol): B barely adsorbs → θ_B ≈ 0 → Rate ≈ 0
+The surface can't hold B long enough to react with A*.
+
+INTERMEDIATE BE_B (~20-25 kcal/mol): B adsorbs with reasonable coverage, sites aren't blocked → both θ_A and θ_B are appreciable → MAXIMUM rate.
+
+HIGH BE_B (> ~35 kcal/mol): B adsorbs too strongly → θ_B → 1, which means θ_* → 0 and θ_A → 0 (B takes all the sites, or blocks A adsorption if competitive). Even though B is present on the surface, A can't adsorb → Rate → 0.
+
+(c) The maximum occurs near BE_B ≈ BE_A ≈ 25 kcal/mol.
+
+This is because optimal catalysis requires BALANCED coverage of both species. If both bind with similar strength, neither dominates the surface excessively.
+
+More precisely, the Sabatier maximum depends on the relationship between binding energies AND the activation barrier for the surface reaction. But as a rule of thumb: ΔH_ads,A ≈ ΔH_ads,B gives balanced coverage and maximum rate.
+
+The volcano shape is a hallmark of heterogeneous catalysis and is the basis for computational catalyst screening.`
+  },
+  {
+    id:16, topic:"LH Kinetics", difficulty:"Hard", icon:"📈", color:"var(--accent-blue)",
+    question:"For the isomerization A → B occurring either:\n(i) In the gas phase through an activated intermediate: A → A‡ → B\n(ii) On a surface: A + * ⇌ A* → B + *\n\nUnder what conditions are the rate laws identical? Show this mathematically and explain physically.\n\n(From 2025 Midterm, Part III.)",
+    hint:"For the gas phase, use the Lindemann mechanism at high pressure. For the surface, use the LH expression in the appropriate limit.",
+    solution:`GAS PHASE (Lindemann mechanism):
+A + M ⇌(k₁/k₋₁) A* → (k₂) B
+
+PSS on A*: d[A*]/dt = k₁[A][M] - k₋₁[A*][M] - k₂[A*] = 0
+[A*] = k₁[A][M]/(k₋₁[M] + k₂)
+
+Rate = k₂[A*] = k₁k₂[A][M]/(k₋₁[M] + k₂)
+
+At HIGH PRESSURE (k₋₁[M] >> k₂):
+Rate = (k₁k₂/k₋₁)[A] = k_eff · [A]  → First order in A
+
+SURFACE (LH mechanism):
+Rate = k_r · θ_A = k_r · KP_A/(1 + KP_A)
+
+At LOW COVERAGE (KP_A << 1):
+Rate = k_r · K · P_A → First order in P_A
+
+THESE ARE IDENTICAL when:
+Surface: low pressure / weak adsorption (KP_A << 1)
+Gas phase: high pressure (plenty of M for activation)
+
+Both give: Rate = k_eff · P_A (first order in A)
+
+Physical explanation: In both cases, the rate-determining step is the unimolecular reaction of the activated/adsorbed species. When the surface coverage is low, the Langmuir expression linearizes to θ_A ≈ KP_A, and the surface behaves like a gas-phase system where the concentration of "activated" molecules is proportional to pressure.
+
+The key condition is that the equilibrium between gas-phase A and the intermediate (A* or A‡) is maintained — achieved at high [M] for gas phase, and at low coverage (quasi-equilibrium) for the surface.`
+  },
+
+  // ── MODEL REDUCTION (17-18) ──
+  {
+    id:17, topic:"Model Reduction", difficulty:"Medium", icon:"✂️", color:"var(--accent-yellow)",
+    question:"The gas phase oxidation of NO follows 3rd-order kinetics: rate = k[NO]²[O₂], but the overall rate constant DECREASES with increasing temperature (negative apparent Ea).\n\n(a) Why is a negative Ea impossible for a truly elementary reaction?\n(b) Propose a mechanism involving NO₃ as an intermediate that explains this behavior.\n(c) Derive the rate law from your mechanism.\n\n(From HW3, Problem 1a.)",
+    hint:"If the overall reaction has negative apparent Ea, consider a fast equilibrium forming NO₃ (exothermic) followed by a slow step. The equilibrium constant decreases with T for exothermic steps.",
+    solution:`(a) For an elementary reaction, Ea represents the energy barrier molecules must overcome. This barrier must be positive (or zero) — molecules need kinetic energy to rearrange bonds. A negative barrier would mean the TS is lower in energy than reactants, which contradicts the definition of a transition state.
+
+(b) Proposed mechanism:
+Step 1: NO + O₂ ⇌ NO₃  (fast equilibrium, EXOTHERMIC)
+Step 2: NO₃ + NO → 2NO₂  (slow, RDS)
+
+(c) Derivation:
+Rate = k₂[NO₃][NO]  (RDS)
+
+From Step 1 equilibrium: K₁ = [NO₃]/([NO][O₂])
+→ [NO₃] = K₁[NO][O₂]
+
+Substituting:
+Rate = k₂ · K₁[NO][O₂] · [NO] = k₂K₁[NO]²[O₂]
+
+This gives the observed rate law: rate = k_obs[NO]²[O₂] ✓
+where k_obs = k₂K₁
+
+WHY NEGATIVE APPARENT Ea:
+k_obs = k₂ · K₁
+= A₂·exp(-Ea₂/RT) · K₁₀·exp(-ΔH₁/RT)
+
+Ea_app = Ea₂ + ΔH₁
+
+Since Step 1 is exothermic: ΔH₁ < 0
+If |ΔH₁| > Ea₂, then Ea_app < 0 ✓
+
+At higher T: K₁ decreases (Le Chatelier for exothermic step) more than k₂ increases → net rate DECREASES.`
+  },
+  {
+    id:18, topic:"Model Reduction", difficulty:"Hard", icon:"✂️", color:"var(--accent-yellow)",
+    question:"For CO oxidation on a surface: CO + ½O₂ → CO₂\nMechanism:\n(1) CO(g) + * ⇌ CO*\n(2) O₂(g) + 2* ⇌ 2O*\n(3) CO* + O* → CO₂(g) + 2* (RDS)\n\nDerive the rate law using the partial equilibrium approach. Your final expression should be in terms of gas pressures, equilibrium constants, and k₃ only.\n\n(From L13 lecture notes.)",
+    hint:"Steps 1 and 2 are in equilibrium. Write K₁ and K₂ expressions. Use the site balance θ_CO + θ_O + θ* = 1 to eliminate θ*.",
+    solution:`Rate = k₃ · θ_CO · θ_O  (RDS)
+
+Step 1 equilibrium: K₁ = θ_CO/(P_CO · θ*)
+→ θ_CO = K₁ · P_CO · θ*
+
+Step 2 equilibrium: K₂ = θ_O²/(P_O₂ · θ*²)
+→ θ_O² = K₂ · P_O₂ · θ*²
+→ θ_O = √(K₂ · P_O₂) · θ*
+
+(CO₂ desorbs immediately → θ_CO₂ ≈ 0)
+
+Site balance: θ_CO + θ_O + θ* = 1
+K₁·P_CO·θ* + √(K₂P_O₂)·θ* + θ* = 1
+θ*[1 + K₁P_CO + √(K₂P_O₂)] = 1
+
+┌────────────────────────────────────────────┐
+│ θ* = 1 / [1 + K₁P_CO + √(K₂P_O₂)]       │
+└────────────────────────────────────────────┘
+
+Substituting into the rate:
+Rate = k₃ · (K₁P_CO·θ*) · (√(K₂P_O₂)·θ*)
+
+┌──────────────────────────────────────────────────────────┐
+│ Rate = k₃·K₁·P_CO·√(K₂P_O₂)                            │
+│        ─────────────────────────────                     │
+│        [1 + K₁P_CO + √(K₂P_O₂)]²                       │
+└──────────────────────────────────────────────────────────┘
+
+Limiting cases:
+• Low coverage (denominators ≈ 1): Rate ≈ k₃K₁P_CO√(K₂P_O₂) — positive order in both
+• CO poisoning (K₁P_CO >> 1): Rate ≈ k₃√(K₂P_O₂)/(K₁P_CO) — NEGATIVE order in CO!
+  This is CO self-poisoning: too much CO blocks sites needed for O₂ dissociation.`
+  },
+
+  // ── INTEGRATED / EXAM-STYLE (19-20) ──
+  {
+    id:19, topic:"Integrated Exam Problem", difficulty:"Challenge", icon:"🎯", color:"var(--accent-fuchsia)",
+    question:"Reverse water-gas shift (RWGS): CO₂ + H₂ → CO + H₂O, on Pt via reversible direct CO₂ dissociation. CO binds weakly, H₂ adsorbs dissociatively, O* is removed by sequential hydrogenation (O*+H*→OH*+*, then OH*+H*→H₂O+2*). H₂O is weakly bound. RDS = OH* formation.\n\n(a) Write the full mechanism.\n(b) Derive the rate law.\n(c) Simplify for: (i) high P_CO₂, (ii) high P_H₂. Explain the difference in CO order.\n\n(From 2025 Midterm, Part IV — 30 points.)",
+    hint:"Identify all elementary steps. CO and H₂O desorb immediately. H₂ dissociates. CO₂ dissociation is reversible (forms CO* + O*). The RDS is O* + H* → OH* + *.",
+    solution:`(a) Full mechanism:
+1) CO₂ + 2* ⇌ CO* + O*  (reversible CO₂ dissociation)
+   1b) CO* ⇌ CO(g) + *    (CO weakly bound, fast desorption)
+2) H₂ + 2* ⇌ 2H*         (dissociative H₂ adsorption)
+3) O* + H* → OH* + *      (RDS!)
+4) OH* + H* → H₂O + 2*   (fast)
+
+(b) Rate = k₃ · θ_O · θ_H
+
+From equilibrium steps:
+Step 1 (combined with 1b, since CO desorbs fast):
+K₁ = P_CO · θ_O / (P_CO₂ · θ*²)
+→ θ_O = K₁ · P_CO₂ · θ*² / P_CO
+
+Step 2: K₂ = θ_H² / (P_H₂ · θ*²)
+→ θ_H = √(K₂ · P_H₂) · θ*
+
+Rate = k₃ · [K₁P_CO₂/(P_CO)] · √(K₂P_H₂) · θ*³
+
+Site balance (neglecting CO*, OH*, H₂O*):
+1 = θ* + θ_O + θ_H + ...
+
+(c) Simplifications:
+
+(i) HIGH P_CO₂: surface dominated by O* (from CO₂ dissociation)
+θ_O ≈ 1, θ* → 0
+Rate ≈ k₃ · 1 · √(K₂P_H₂) · θ*
+Rate ∝ √P_H₂ · θ*  →  Rate decreases as P_CO₂ increases further (blocks sites)
+Rate becomes approximately independent of CO₂ (0th order) and weakly dependent on H₂.
+CO order: since θ_O depends on P_CO₂/P_CO, adding CO shifts equilibrium back → θ_O decreases → rate is NEGATIVE order in CO.
+
+(ii) HIGH P_H₂: surface dominated by H*
+θ_H ≈ 1, θ* → 0
+Rate ≈ k₃ · K₁P_CO₂/(P_CO) · θ*²
+Rate ∝ P_CO₂/P_CO
+CO order: NEGATIVE first order in CO (CO appears in denominator from the CO₂ dissociation equilibrium).
+
+The BIG difference: At high P_CO₂, CO inhibits via the reverse of step 1 (Le Chatelier — adding product CO pushes dissociation equilibrium back). At high P_H₂, the inhibition by CO is even stronger because θ* is already small (H blocks sites), making the P_CO₂/(P_CO·θ*²) term very sensitive to P_CO.`
+  },
+  {
+    id:20, topic:"Integrated Exam Problem", difficulty:"Challenge", icon:"🎯", color:"var(--accent-fuchsia)",
+    question:"Consider the energy diagram below for a catalytic cycle:\nR → TS1 → I₁ → TS2 → I₂ → TS3 → P\n\nWhere I₂ is the deepest intermediate, TS2 is the highest transition state, and TS3 is slightly lower than TS2.\n\n(a) Which transition state has the highest degree of rate control? Explain using the energetic span model.\n(b) If you could lower the energy of ONE transition state by 5 kJ/mol, which would you choose to maximize the rate increase?\n(c) If you could destabilize ONE intermediate by 5 kJ/mol (raise its energy), which would you choose?\n(d) Are the answers to (b) and (c) always the same species? Why or why not?\n\n(Adapted from 2025 Midterm, Part I-iii.)",
+    hint:"The energetic span is E(TS_highest) - E(I_deepest). But be careful — you need to check if the highest TS comes AFTER the deepest intermediate in the cycle.",
+    solution:`(a) The degree of rate control is determined by the ENERGETIC SPAN:
+
+δE = E(TS_determining) - E(I_determining)
+
+where the determining TS is the highest and the determining intermediate is the most stable one that PRECEDES it (wrapping around the cycle if needed).
+
+Since I₂ is the deepest intermediate and TS2 is the highest TS:
+
+If TS2 comes AFTER I₂: span = E(TS2) - E(I₂) → TS2 has highest DRC
+
+If TS2 comes BEFORE I₂: we need span = E(TS2) - E(I₁) [preceding intermediate]
+AND check span from I₂: = E(TS3) - E(I₂)
+
+In the given sequence R→TS1→I₁→TS2→I₂→TS3→P:
+TS2 comes BEFORE I₂, so TS2 is preceded by I₁.
+Span for TS2 = E(TS2) - E(I₁)
+Span for TS3 = E(TS3) - E(I₂)
+
+The LARGER span determines the rate. Since I₂ is the deepest well and TS3 is only slightly lower than TS2, the span E(TS3) - E(I₂) could be the largest.
+
+Most likely: TS3 has the highest degree of rate control (despite being lower in absolute energy than TS2) because it must be overcome starting from the deepest well I₂.
+
+(b) Lower TS3 by 5 kJ/mol — since it has the highest DRC, reducing it directly reduces the energetic span and increases the rate the most.
+
+(c) Destabilize I₂ by 5 kJ/mol — raising the deepest well also reduces the energetic span (from the other direction).
+
+(d) They target the SAME span (TS3-I₂) but different species. They are NOT always the same species — (b) targets the TS and (c) targets the intermediate. In catalyst design, you might have more control over one vs the other depending on the chemistry. The key insight is that BOTH the determining TS and the determining intermediate matter equally for the rate.`
+  },
+];
+
+// ═══════════════════════════════════════
+// APP STATE & LOGIC
+// ═══════════════════════════════════════
+let chatHistory = [];
+let currentFilter = "All";
+
+// ── Tab switching ──
+function switchTab(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', ['home','qa','problems'][i] === id);
+  });
+  if (id === 'problems') renderProblems();
+  if (id === 'qa') setTimeout(() => document.getElementById('chatInput')?.focus(), 100);
+}
+
+// ── Chat ──
+function useQuickQ(text) {
+  document.getElementById('chatInput').value = text;
+  document.getElementById('chatInput').focus();
+}
+
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  document.getElementById('chatEmpty').style.display = 'none';
+  const list = document.getElementById('msgList');
+  list.style.display = 'flex';
+
+  // Add user message
+  const userDiv = document.createElement('div');
+  userDiv.className = 'msg msg-user';
+  userDiv.textContent = text;
+  list.appendChild(userDiv);
+
+  // Loading indicator
+  const loadDiv = document.createElement('div');
+  loadDiv.className = 'msg msg-ai';
+  loadDiv.innerHTML = '<div class="loading-dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>';
+  list.appendChild(loadDiv);
+  list.parentElement.scrollTop = list.parentElement.scrollHeight;
+
+  // Disable input
+  input.disabled = true;
+  document.getElementById('sendBtn').disabled = true;
+
+  chatHistory.push({ role: "user", content: text });
+
+  // Check if API key is configured
+  if (!ANTHROPIC_API_KEY || ANTHROPIC_API_KEY === "YOUR_API_KEY_HERE") {
+    loadDiv.innerHTML = '';
+    loadDiv.textContent = "⚠️ The AI tutor is not configured yet. The instructor needs to add an API key to enable this feature. In the meantime, check out the Practice Problems tab!";
+    input.disabled = false;
+    document.getElementById('sendBtn').disabled = false;
+    input.focus();
+    return;
+  }
+
+  try {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: chatHistory.slice(-10),
+      }),
+    });
+    const data = await resp.json();
+
+    if (data.error) {
+      loadDiv.innerHTML = '';
+      loadDiv.textContent = "API error: " + (data.error.message || "Unknown error. Check the API key and spend limit.");
+      chatHistory.pop(); // remove the failed user message from history
+    } else {
+      const reply = data.content?.map(b => b.text || "").filter(Boolean).join("\n") || "Sorry, I couldn't generate a response. Please try again.";
+      chatHistory.push({ role: "assistant", content: reply });
+      loadDiv.innerHTML = '';
+      loadDiv.textContent = reply;
+    }
+  } catch (err) {
+    loadDiv.innerHTML = '';
+    loadDiv.textContent = "Connection error — please check your network and try again. (" + err.message + ")";
+    chatHistory.pop();
+  }
+
+  input.disabled = false;
+  document.getElementById('sendBtn').disabled = false;
+  input.focus();
+  list.parentElement.scrollTop = list.parentElement.scrollHeight;
+}
+
+// ── Problems ──
+function renderProblems() {
+  const topics = [...new Set(PROBLEMS.map(p => p.topic))];
+  const bar = document.getElementById('filterBar');
+  bar.innerHTML = `<button class="filter-chip ${currentFilter==='All'?'active':''}" onclick="setFilter('All')">All (${PROBLEMS.length})</button>`;
+  topics.forEach(t => {
+    const count = PROBLEMS.filter(p => p.topic === t).length;
+    const p0 = PROBLEMS.find(p => p.topic === t);
+    bar.innerHTML += `<button class="filter-chip ${currentFilter===t?'active':''}" onclick="setFilter('${t}')">${p0.icon} ${t} (${count})</button>`;
+  });
+
+  const filtered = currentFilter === 'All' ? PROBLEMS : PROBLEMS.filter(p => p.topic === currentFilter);
+  document.getElementById('problemCount').textContent = `${filtered.length} problem${filtered.length!==1?'s':''}`;
+
+  const list = document.getElementById('problemList');
+  list.innerHTML = '';
+  filtered.forEach(p => {
+    const diffClass = p.difficulty === 'Hard' ? 'diff-hard' : p.difficulty === 'Challenge' ? 'diff-challenge' : 'diff-medium';
+    const card = document.createElement('div');
+    card.className = 'problem-card';
+    card.id = 'problem-' + p.id;
+    card.innerHTML = `
+      <div class="problem-header" onclick="toggleProblem(${p.id})">
+        <div class="problem-tags">
+          <span class="problem-topic" style="color:${p.color}">${p.icon} ${p.topic}</span>
+          <span class="difficulty-badge ${diffClass}">${p.difficulty}</span>
+        </div>
+        <span class="expand-icon" id="expand-${p.id}">▼</span>
+      </div>
+      <div class="problem-text" onclick="toggleProblem(${p.id})">${escapeHtml(p.question)}</div>
+      <div class="problem-actions" id="actions-${p.id}" style="display:none">
+        <button class="action-btn" onclick="event.stopPropagation();toggleHint(${p.id})">💡 <span id="hint-label-${p.id}">Show Hint</span></button>
+        <div class="hint-box" id="hint-${p.id}" style="display:none">${escapeHtml(p.hint)}</div>
+        <button class="action-btn" onclick="event.stopPropagation();toggleSolution(${p.id})">📋 <span id="sol-label-${p.id}">Show Solution</span></button>
+        <div class="solution-box" id="sol-${p.id}" style="display:none">${escapeHtml(p.solution)}</div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  renderProblems();
+}
+
+function toggleProblem(id) {
+  const actions = document.getElementById('actions-' + id);
+  const icon = document.getElementById('expand-' + id);
+  const isOpen = actions.style.display !== 'none';
+  actions.style.display = isOpen ? 'none' : 'flex';
+  icon.style.transform = isOpen ? 'none' : 'rotate(180deg)';
+}
+
+function toggleHint(id) {
+  const el = document.getElementById('hint-' + id);
+  const label = document.getElementById('hint-label-' + id);
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  label.textContent = isOpen ? 'Show Hint' : 'Hide Hint';
+}
+
+function toggleSolution(id) {
+  const el = document.getElementById('sol-' + id);
+  const label = document.getElementById('sol-label-' + id);
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  label.textContent = isOpen ? 'Show Solution' : 'Hide Solution';
+}
+
+function escapeHtml(text) {
+  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', () => {
+  renderProblems();
+});
+</script>
+</body>
+</html>
